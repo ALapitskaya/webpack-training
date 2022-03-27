@@ -10,6 +10,19 @@ const webpack = require("webpack");
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
 
+const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`;
+const cssLoaders = (extra) => {
+    const loaders = [
+        {loader: MiniCssExtractPlugin.loader},
+        "css-loader"
+    ]
+
+    if(extra) {
+        loaders.push(extra);
+    }
+
+    return loaders;
+}
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
@@ -18,7 +31,7 @@ module.exports = {
         analytics: './analytics.js'
     },
     output: {
-        filename: '[name].[contenthash].js',
+        filename: filename('js'),
         path: path.resolve(__dirname, 'dist')
     },
     resolve: {
@@ -38,7 +51,7 @@ module.exports = {
     },
     devServer: {
         port: 4200,
-        hot: isDev
+        open: true
     },
     plugins: [
         new HTMLWebpackPlugin({
@@ -57,7 +70,7 @@ module.exports = {
             ],
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[contenthash].css'
+            filename: filename('css'),
         })
     ],
     module: {
@@ -68,12 +81,15 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                    },
-                    "css-loader",
-                ],
+                use: cssLoaders(),
+            },
+            {
+                test: /\.less$/,
+                use: cssLoaders("less-loader"),
+            },
+            {
+                test: /\.s[ac]ss$/i,
+                use: cssLoaders("sass-loader"),
             },
             {
                 test: /\.xml$/,
