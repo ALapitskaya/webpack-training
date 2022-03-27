@@ -11,7 +11,7 @@ const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
 
 const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`;
-const cssLoaders = (extra) => {
+const cssLoaders = extra => {
     const loaders = [
         {loader: MiniCssExtractPlugin.loader},
         "css-loader"
@@ -23,12 +23,26 @@ const cssLoaders = (extra) => {
 
     return loaders;
 }
+
+const babelOptions = preset => {
+    const opts = {
+        presets: ['@babel/preset-env'],
+        plugins: ['@babel/plugin-transform-runtime']
+    }
+
+    if(preset) {
+        opts.presets.push(preset);
+    }
+
+    return opts
+}
+
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
         main: './index.js',
-        analytics: './analytics.js'
+        analytics: './analytics.ts'
     },
     output: {
         filename: filename('js'),
@@ -98,6 +112,22 @@ module.exports = {
             {
                 test: /\.csv$/,
                 use: ['csv-loader']
+            },
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: babelOptions()
+                }
+            },
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: babelOptions('@babel/preset-typescript')
+                }
             }
         ]
     }
