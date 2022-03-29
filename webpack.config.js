@@ -41,7 +41,7 @@ module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
-        main: './index.js',
+        main: './index.jsx',
         analytics: './analytics.ts'
     },
     output: {
@@ -67,6 +67,7 @@ module.exports = {
         port: 4200,
         open: true
     },
+    devtool: isDev ? 'source-map' : '',
     plugins: [
         new HTMLWebpackPlugin({
             template: './index.html',
@@ -127,6 +128,14 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: babelOptions('@babel/preset-typescript')
+                }
+            },
+            {
+                test: /\.jsx$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: babelOptions('@babel/preset-react')
                 }
             }
         ]
